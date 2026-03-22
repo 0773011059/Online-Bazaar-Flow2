@@ -8,28 +8,28 @@ INSERT INTO categories (name, description) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- Insert sample products
-INSERT INTO products (name, price, quantity, category_id, barcode, description, is_available) VALUES
+INSERT INTO products (category_id, name, description, price, stock_quantity, barcode, is_available) VALUES
   -- لبنیات
-  ('شیر پاستوریزه 1 لیتری', 15000, 100, (SELECT id FROM categories WHERE name = 'لبنیات'), 'MILK001', 'شیر تازه پاستوریزه', true),
-  ('ماست چربی 400 گرم', 12000, 80, (SELECT id FROM categories WHERE name = 'لبنیات'), 'YOGI001', 'ماست طبیعی چربی دار', true),
-  ('پنیر سفید 500 گرم', 35000, 50, (SELECT id FROM categories WHERE name = 'لبنیات'), 'CHEESE001', 'پنیر سفید صنعتی', true),
+  ((SELECT id FROM categories WHERE name = 'لبنیات'), 'شیر پاستوریزه 1 لیتری', 'شیر تازه پاستوریزه', 15000, 100, 'MILK001', true),
+  ((SELECT id FROM categories WHERE name = 'لبنیات'), 'ماست چربی 400 گرم', 'ماست طبیعی چربی دار', 12000, 80, 'YOGI001', true),
+  ((SELECT id FROM categories WHERE name = 'لبنیات'), 'پنیر سفید 500 گرم', 'پنیر سفید صنعتی', 35000, 50, 'CHEESE001', true),
   
   -- نوشیدنی
-  ('کوکا کولا 1.5 لیتری', 18000, 120, (SELECT id FROM categories WHERE name = 'نوشیدنی'), 'COKE001', 'نوشابه کوکا کولا', true),
-  ('آب میوه پرتقال 1 لیتری', 22000, 90, (SELECT id FROM categories WHERE name = 'نوشیدنی'), 'OJ001', 'آب میوه پرتقال تازه', true),
-  ('چای سیاه 500 گرم', 25000, 60, (SELECT id FROM categories WHERE name = 'نوشیدنی'), 'TEA001', 'چای سیاه خوی', true),
+  ((SELECT id FROM categories WHERE name = 'نوشیدنی'), 'کوکا کولا 1.5 لیتری', 'نوشابه کوکا کولا', 18000, 120, 'COKE001', true),
+  ((SELECT id FROM categories WHERE name = 'نوشیدنی'), 'آب میوه پرتقال 1 لیتری', 'آب میوه پرتقال تازه', 22000, 90, 'OJ001', true),
+  ((SELECT id FROM categories WHERE name = 'نوشیدنی'), 'چای سیاه 500 گرم', 'چای سیاه خوی', 25000, 60, 'TEA001', true),
   
   -- غذا
-  ('برنج هاشمی 1 کیلو', 28000, 200, (SELECT id FROM categories WHERE name = 'غذا'), 'RICE001', 'برنج ایرانی هاشمی', true),
-  ('روغن کانولا 1 لیتری', 35000, 80, (SELECT id FROM categories WHERE name = 'غذا'), 'OIL001', 'روغن سرخ‌پختی', true),
-  ('نان سفید 400 گرم', 8000, 300, (SELECT id FROM categories WHERE name = 'غذا'), 'BREAD001', 'نان سفید تازه', true),
+  ((SELECT id FROM categories WHERE name = 'غذا'), 'برنج هاشمی 1 کیلو', 'برنج ایرانی هاشمی', 28000, 200, 'RICE001', true),
+  ((SELECT id FROM categories WHERE name = 'غذا'), 'روغن کانولا 1 لیتری', 'روغن سرخ‌پختی', 35000, 80, 'OIL001', true),
+  ((SELECT id FROM categories WHERE name = 'غذا'), 'نان سفید 400 گرم', 'نان سفید تازه', 8000, 300, 'BREAD001', true),
   
   -- میوه
-  ('سیب قرمز 1 کیلو', 20000, 150, (SELECT id FROM categories WHERE name = 'میوه'), 'APPLE001', 'سیب قرمز تازه', true),
-  ('موز 1 کیلو', 18000, 120, (SELECT id FROM categories WHERE name = 'میوه'), 'BANANA001', 'موز تازه و رسیده', true),
-  ('نارنجی 1 کیلو', 19000, 100, (SELECT id FROM categories WHERE name = 'میوه'), 'ORANGE001', 'نارنجی شیرین', true),
+  ((SELECT id FROM categories WHERE name = 'میوه'), 'سیب قرمز 1 کیلو', 'سیب قرمز تازه', 20000, 150, 'APPLE001', true),
+  ((SELECT id FROM categories WHERE name = 'میوه'), 'موز 1 کیلو', 'موز تازه و رسیده', 18000, 120, 'BANANA001', true),
+  ((SELECT id FROM categories WHERE name = 'میوه'), 'نارنجی 1 کیلو', 'نارنجی شیرین', 19000, 100, 'ORANGE001', true),
   
   -- سبزیجات
-  ('گوجه‌فرنگی 1 کیلو', 16000, 180, (SELECT id FROM categories WHERE name = 'سبزیجات'), 'TOMATO001', 'گوجه‌فرنگی تازه', true),
-  ('خیار 1 کیلو', 14000, 150, (SELECT id FROM categories WHERE name = 'سبزیجات'), 'CUCUMBER001', 'خیار تازه', true),
-  ('پیاز سفید 1 کیلو', 12000, 200, (SELECT id FROM categories WHERE name = 'سبزیجات'), 'ONION001', 'پیاز سفید خوب', true);
+  ((SELECT id FROM categories WHERE name = 'سبزیجات'), 'گوجه‌فرنگی 1 کیلو', 'گوجه‌فرنگی تازه', 16000, 180, 'TOMATO001', true),
+  ((SELECT id FROM categories WHERE name = 'سبزیجات'), 'خیار 1 کیلو', 'خیار تازه', 14000, 150, 'CUCUMBER001', true),
+  ((SELECT id FROM categories WHERE name = 'سبزیجات'), 'پیاز سفید 1 کیلو', 'پیاز سفید خوب', 12000, 200, 'ONION001', true);

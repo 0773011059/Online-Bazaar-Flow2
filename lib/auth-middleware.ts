@@ -63,3 +63,47 @@ export function requireAuth(allowedRoles?: string[]) {
     };
   };
 }
+
+export async function verifyAuth(request: NextRequest) {
+  const sessionToken = request.cookies.get('sessionToken')?.value;
+
+  if (!sessionToken) {
+    return null;
+  }
+
+  try {
+    const result = await sql`
+      SELECT s.user_id, s.expires_at, u.role
+      FROM sessions s
+      JOIN users u ON s.user_id = u.id
+      WHERE s.token = ${sessionToken}
+      AND s.expires_at > NOW()
+      LIMIT 1
+    `;
+
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    const session = result.rows[0];
+
+    return {
+      userId: session.user_id,
+      role: session.role,
+      expiresAt: session.expires_at,
+    };
+  } catch (error) {
+    console.error('[v0] Auth verification error:', error);
+    return null;
+  }
+}
+
+export async function verifyAdmin(request: NextRequest) {
+  const auth = await verifyAuth(request);
+  
+  if (!auth || auth.role !== 'admin') {
+    return null;
+  }
+
+  return auth;
+}
