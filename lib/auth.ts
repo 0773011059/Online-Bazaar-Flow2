@@ -1,20 +1,16 @@
-import { sql } from '@neon/serverless';
 import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
+import { query } from './db';
 
-// Hash password using bcrypt (simple implementation)
+// Hash password using bcrypt
 export async function hashPassword(password: string): Promise<string> {
-  // For production, use proper bcrypt library
-  // This is a simplified version for demonstration
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-  return `${salt}:${hash}`;
+  const saltRounds = 10;
+  return await bcrypt.hash(password, saltRounds);
 }
 
 // Verify password
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  const [salt, hash] = hashedPassword.split(':');
-  const hashVerify = crypto.pbkdf2Sync(password, salt, 1000, 64, 'sha512').toString('hex');
-  return hash === hashVerify;
+  return await bcrypt.compare(password, hashedPassword);
 }
 
 // Create session token
@@ -25,12 +21,10 @@ export function createSessionToken(): string {
 // Get user by email
 export async function getUserByEmail(email: string) {
   try {
-    const result = await sql`
-      SELECT id, email, password_hash, role, is_active
-      FROM users
-      WHERE email = ${email.toLowerCase()}
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT id, email, password_hash, role, is_active FROM users WHERE email = $1 LIMIT 1',
+      [email.toLowerCase()]
+    );
     return result.rows[0] || null;
   } catch (error) {
     console.error('[v0] Error fetching user:', error);
@@ -41,12 +35,10 @@ export async function getUserByEmail(email: string) {
 // Get user by ID
 export async function getUserById(id: string) {
   try {
-    const result = await sql`
-      SELECT id, email, role, is_active
-      FROM users
-      WHERE id = ${id}
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT id, email, role, is_active FROM users WHERE id = $1 LIMIT 1',
+      [id]
+    );
     return result.rows[0] || null;
   } catch (error) {
     console.error('[v0] Error fetching user by ID:', error);
@@ -60,11 +52,10 @@ export async function registerUser(email: string, password: string, role: 'custo
     const hashedPassword = await hashPassword(password);
     const userId = crypto.randomUUID();
 
-    const result = await sql`
-      INSERT INTO users (id, email, password_hash, role, is_active, created_at)
-      VALUES (${userId}, ${email.toLowerCase()}, ${hashedPassword}, ${role}, true, NOW())
-      RETURNING id, email, role
-    `;
+    const result = await query(
+      'INSERT INTO users (id, email, password_hash, role, is_active, created_at) VALUES ($1, $2, $3, $4, true, NOW()) RETURNING id, email, role',
+      [userId, email.toLowerCase(), hashedPassword, role]
+    );
 
     return result.rows[0] || null;
   } catch (error) {
@@ -76,13 +67,10 @@ export async function registerUser(email: string, password: string, role: 'custo
 // Get delivery staff info
 export async function getDeliveryStaffById(userId: string) {
   try {
-    const result = await sql`
-      SELECT ds.*, u.email
-      FROM delivery_staff ds
-      JOIN users u ON ds.user_id = u.id
-      WHERE ds.user_id = ${userId}
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT ds.*, u.email FROM delivery_staff ds JOIN users u ON ds.user_id = u.id WHERE ds.user_id = $1 LIMIT 1',
+      [userId]
+    );
     return result.rows[0] || null;
   } catch (error) {
     console.error('[v0] Error fetching delivery staff:', error);
@@ -93,13 +81,10 @@ export async function getDeliveryStaffById(userId: string) {
 // Get customer info
 export async function getCustomerById(userId: string) {
   try {
-    const result = await sql`
-      SELECT c.*, u.email
-      FROM customers c
-      JOIN users u ON c.user_id = u.id
-      WHERE c.user_id = ${userId}
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT c.*, u.email FROM customers c JOIN users u ON c.user_id = u.id WHERE c.user_id = $1 LIMIT 1',
+      [userId]
+    );
     return result.rows[0] || null;
   } catch (error) {
     console.error('[v0] Error fetching customer:', error);

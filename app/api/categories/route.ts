@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@neon/serverless';
+import { query } from '@/lib/db';
 import { verifySession } from '@/lib/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
-    const result = await sql`
-      SELECT id, name, description
-      FROM categories
-      ORDER BY name
-    `;
+    const result = await query(
+      'SELECT id, name, description FROM categories ORDER BY name'
+    );
 
     return NextResponse.json(result.rows);
   } catch (error) {
@@ -40,11 +38,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await sql`
-      INSERT INTO categories (name, description)
-      VALUES (${name}, ${description || ''})
-      RETURNING *
-    `;
+    const result = await query(
+      'INSERT INTO categories (name, description) VALUES ($1, $2) RETURNING *',
+      [name, description || '']
+    );
 
     return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {

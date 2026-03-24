@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@neon/serverless';
+import { query } from './db';
 
 export async function verifySession(request: NextRequest) {
   const sessionToken = request.cookies.get('sessionToken')?.value;
@@ -9,14 +9,10 @@ export async function verifySession(request: NextRequest) {
   }
 
   try {
-    const result = await sql`
-      SELECT s.user_id, s.expires_at, u.role, u.is_active
-      FROM sessions s
-      JOIN users u ON s.user_id = u.id
-      WHERE s.token = ${sessionToken}
-      AND s.expires_at > NOW()
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT s.user_id, s.expires_at, u.role, u.is_active FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = $1 AND s.expires_at > NOW() LIMIT 1',
+      [sessionToken]
+    );
 
     if (result.rows.length === 0) {
       return null;
@@ -72,14 +68,10 @@ export async function verifyAuth(request: NextRequest) {
   }
 
   try {
-    const result = await sql`
-      SELECT s.user_id, s.expires_at, u.role
-      FROM sessions s
-      JOIN users u ON s.user_id = u.id
-      WHERE s.token = ${sessionToken}
-      AND s.expires_at > NOW()
-      LIMIT 1
-    `;
+    const result = await query(
+      'SELECT s.user_id, s.expires_at, u.role FROM sessions s JOIN users u ON s.user_id = u.id WHERE s.token = $1 AND s.expires_at > NOW() LIMIT 1',
+      [sessionToken]
+    );
 
     if (result.rows.length === 0) {
       return null;

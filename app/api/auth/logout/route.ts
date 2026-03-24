@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@neon/serverless';
+import { query } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
   try {
@@ -7,10 +7,10 @@ export async function POST(request: NextRequest) {
 
     if (sessionToken) {
       // Delete session from database
-      await sql`
-        DELETE FROM sessions
-        WHERE token = ${sessionToken}
-      `;
+      await query(
+        'DELETE FROM sessions WHERE token = $1',
+        [sessionToken]
+      );
     }
 
     // Clear cookie

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByEmail, verifyPassword } from '@/lib/auth';
-import { sql } from '@neon/serverless';
+import { query } from '@/lib/db';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -46,16 +46,10 @@ export async function POST(request: NextRequest) {
     const sessionId = crypto.randomUUID();
 
     // Store session in database
-    await sql`
-      INSERT INTO sessions (id, user_id, token, expires_at, created_at)
-      VALUES (
-        ${sessionId},
-        ${user.id},
-        ${sessionToken},
-        NOW() + INTERVAL '7 days',
-        NOW()
-      )
-    `;
+    await query(
+      'INSERT INTO sessions (id, user_id, token, expires_at, created_at) VALUES ($1, $2, $3, NOW() + INTERVAL \'7 days\', NOW())',
+      [sessionId, user.id, sessionToken]
+    );
 
     // Create response with session cookie
     const response = NextResponse.json(

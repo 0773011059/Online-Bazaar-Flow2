@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerUser, getUserByEmail } from '@/lib/auth';
-import { sql } from '@neon/serverless';
+import { query } from '@/lib/db';
 import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      await sql`
-        INSERT INTO customers (id, user_id, first_name, last_name, phone, address)
-        VALUES (${crypto.randomUUID()}, ${user.id}, ${firstName}, ${lastName || ''}, ${phone}, ${address})
-      `;
+      await query(
+        'INSERT INTO customers (id, user_id, first_name, last_name, phone, address) VALUES ($1, $2, $3, $4, $5, $6)',
+        [crypto.randomUUID(), user.id, firstName, lastName || '', phone, address]
+      );
     } else if (role === 'delivery') {
       if (!firstName || !cardNumber) {
         return NextResponse.json(
@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      await sql`
-        INSERT INTO delivery_staff (id, user_id, first_name, last_name, card_number, is_verified)
-        VALUES (${crypto.randomUUID()}, ${user.id}, ${firstName}, ${lastName || ''}, ${cardNumber}, false)
-      `;
+      await query(
+        'INSERT INTO delivery_staff (id, user_id, first_name, last_name, card_number, is_verified) VALUES ($1, $2, $3, $4, $5, false)',
+        [crypto.randomUUID(), user.id, firstName, lastName || '', cardNumber]
+      );
     }
 
     return NextResponse.json(
